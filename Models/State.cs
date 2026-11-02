@@ -18,6 +18,6 @@ public class State
     public DateTime? UpdatedAt { get; set; }
 
     public Country Country { get; set; } = null!;
-    public ICollection<City> Cities { get; set; } = []
-    public ICollection<Address> Addresses { get; set; } = []
+    public ICollection<City> Cities { get; set; } = [];
+    public ICollection<Address> Addresses { get; set; } = [];
 }
