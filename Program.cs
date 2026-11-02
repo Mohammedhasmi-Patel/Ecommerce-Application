@@ -13,13 +13,13 @@ builder.Services.AddScoped<CountrySeeder>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var seeder = scope.ServiceProvider
-        .GetRequiredService<CountrySeeder>();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var seeder = scope.ServiceProvider
+//        .GetRequiredService<CountrySeeder>();
 
-    await seeder.SeedAsync();
-}
+//    await seeder.SeedAsync();
+//}
 
 app.UseHttpsRedirection();
 
