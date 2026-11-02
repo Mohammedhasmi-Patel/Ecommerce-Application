@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace Ecommerce.Models;
 
@@ -11,4 +11,9 @@ public class AspNetUsers : IdentityUser<Guid>
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
+
+    public ICollection<EmailVerificationOtp> EmailVerificationOtps { get; set; } = [];
+    public Cart? Cart { get; set; }
+    public ICollection<Order> Orders { get; set; } = [];
+    public ICollection<Address> Addresses { get; set; } = [];
 }

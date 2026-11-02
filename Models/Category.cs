@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ecommerce.Models;
+
 public class Category
 {
     [Key]
@@ -14,5 +15,8 @@ public class Category
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
-}
 
+    public Category? ParentCategory { get; set; }
+    public ICollection<Category> SubCategories { get; set; } = [];
+    public ICollection<Product> Products { get; set; } = [];
+}

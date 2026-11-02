@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+
 namespace Ecommerce.Models;
 
 public class City
 {
-
     [Key]
     public Guid Id { get; set; }
     public Guid StateId { get; set; }
@@ -13,4 +13,7 @@ public class City
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+
+    public State State { get; set; } = null!;
+    public ICollection<Address> Addresses { get; set; } = [];
 }

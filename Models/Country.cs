@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ecommerce.Models;
 
@@ -12,8 +12,10 @@ public class Country
     public string? PhoneCode { get; set; }
     public string? CurrencyCode { get; set; }
     public string? CurrencySymbol { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
-}
 
+    public ICollection<State> States { get; set; } = [];
+    public ICollection<Address> Addresses { get; set; } = [];
+}
