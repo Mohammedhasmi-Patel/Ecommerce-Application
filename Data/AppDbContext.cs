@@ -12,19 +12,21 @@ public class AppDbContext : IdentityDbContext<AspNetUsers, IdentityRole<Guid>, G
     {
     }
 
-    public DbSet<Country> Countries => Set<Country>();
-    public DbSet<State> States => Set<State>();
-    public DbSet<City> Cities => Set<City>();
-    public DbSet<Category> Categories => Set<Category>();
-    public DbSet<Product> Products => Set<Product>();
-    public DbSet<EmailVerificationOtp> EmailVerificationOtps => Set<EmailVerificationOtp>();
-    public DbSet<Cart> Carts => Set<Cart>();
-    public DbSet<CartItem> CartItems => Set<CartItem>();
-    public DbSet<Order> Orders => Set<Order>();
-    public DbSet<Payment> Payments => Set<Payment>();
-    public DbSet<Address> Addresses => Set<Address>();
-    public DbSet<OrderAddress> OrderAddresses => Set<OrderAddress>();
-    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<Country> Countries {  get; set; }
+    public DbSet<State> States { get; set; }
+    public DbSet<City> Cities { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<EmailVerificationOtp> EmailVerificationOtps { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Address> Addresses { get; set; }
+    public DbSet<OrderAddress> OrderAddresses { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<ErrorLog> ErrorLogs { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
