@@ -33,7 +33,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
 
-    public async Task<IActionResult> VerifyUser([FromBody] VerifyUserRequest request)
+    public async Task<IActionResult> VerifyUserAsync([FromBody] VerifyUserRequest request)
     {
         var response = await _authService.VerifyEmailAsync(request);
         return Ok(response);
