@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Ecommerce.DTO.User;
 
-namespace Ecommerce.Validators
+namespace Ecommerce.Validators.Auth
 {
     public class LoginRequestValidator : AbstractValidator<AdminLoginRequest>
     {

@@ -38,6 +38,7 @@ namespace Ecommerce.Middleware
                     };
 
                     await _dbContext.ErrorLogs.AddAsync(errorLog);
+                    await _dbContext.SaveChangesAsync();
                     await HandleExceptionAsync(context, ex);
                 }
                 catch (Exception logException)
