@@ -16,14 +16,17 @@ namespace Ecommerce.Services.Auth
     {
         private readonly UserManager<AspNetUsers> _userManager;
         private readonly IEmailService _emailService;
+        private readonly ITokenService _tokenService;
+
         private readonly AppDbContext _context;
         private const int OtpValidityMinutes = 10;
         private const int ResendCooldownSeconds = 60;
 
-        public AuthService(UserManager<AspNetUsers> userManager, IEmailService emailService, AppDbContext context)
+        public AuthService(UserManager<AspNetUsers> userManager, IEmailService emailService, ITokenService tokenService, AppDbContext context)
         {
             _userManager = userManager;
             _emailService = emailService;
+            _tokenService = tokenService;
             _context = context;
         }
 
@@ -72,7 +75,6 @@ namespace Ecommerce.Services.Auth
             user.ProfileImageUrl = profileImageUrl;
             user.IsActive = false;
             user.EmailConfirmed = false;
-            user.Role = UserRoleEnum.User;
             user.CreatedAt = DateTime.UtcNow;
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -83,6 +85,18 @@ namespace Ecommerce.Services.Auth
                     File.Delete(savedFilePath);
                 }
                 var error = result.Errors.FirstOrDefault()?.Description ?? "Something went wrong while storing user info.";
+                throw new BadRequestException(error);
+            }
+
+            var roleResult = await _userManager.AddToRoleAsync(user, nameof(UserRoleEnum.User));
+            if (!roleResult.Succeeded)
+            {
+                await _userManager.DeleteAsync(user);
+                if (savedFilePath != null && File.Exists(savedFilePath))
+                {
+                    File.Delete(savedFilePath);
+                }
+                var error = roleResult.Errors.FirstOrDefault()?.Description ?? "Failed to assign role to user.";
                 throw new BadRequestException(error);
             }
 
@@ -244,6 +258,45 @@ namespace Ecommerce.Services.Auth
         private static string GenerateSecureOtp()
         {
             return RandomNumberGenerator.GetInt32(100_000, 1_000_000).ToString();
+        }
+
+        public async Task<ApiResponse<LoginResponse>> AdminLoginAsync(AdminLoginRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email)
+                ?? throw new NotFoundException("User not found.");
+
+            if (!user.EmailConfirmed)
+            {
+                throw new BadRequestException("User is not verified yet.");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            string adminRole = roles.FirstOrDefault();
+
+            if (adminRole == null || adminRole != nameof(UserRoleEnum.Admin))
+            {
+                throw new BadRequestException("You don't have access to this feature.");
+            }
+
+            bool isPasswordMatch = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!isPasswordMatch)
+            {
+                throw new UnauthorizedException("Invalid email or password.");
+            }
+
+            string token = await _tokenService.GenerateToken(user);
+
+            LoginResponse response = user.Adapt<LoginResponse>();
+            response.Token = token;
+            response.Role = adminRole;
+            return new ApiResponse<LoginResponse>()
+            {
+                Success = true,
+                Message = "Logged in successfully.",
+                Data = response,
+                StatusCode = 200
+            };
+
         }
     }
 }

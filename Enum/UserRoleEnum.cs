@@ -1,4 +1,4 @@
-﻿namespace Ecommerce.Enum
+namespace Ecommerce.Enum
 {
     public enum UserRoleEnum
     {

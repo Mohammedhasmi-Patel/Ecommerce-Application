@@ -10,10 +10,6 @@ namespace Ecommerce.Contracts
 
         Task<ApiResponse<bool>> ResendOtpAsync(ResendOtpRequest request);
 
-        //Task<ApiResponse<LoginResponse>> LoginAsync(LoginRequest request);
-
-        //Task<ApiResponse<bool>> ForgotPasswordAsync(ForgotPasswordRequest request);
-
-        //Task<ApiResponse<bool>> ResetPasswordAsync(ResetPasswordRequest request);
+        Task<ApiResponse<LoginResponse>> AdminLoginAsync(AdminLoginRequest request);
     }
 }

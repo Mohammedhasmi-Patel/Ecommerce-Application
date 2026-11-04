@@ -2,6 +2,7 @@
 using Ecommerce.DTO.User;
 using Microsoft.AspNetCore.Mvc;
 using Ecommerce.Common;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace Ecommerce.Controllers;
 
@@ -48,6 +49,18 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> ResendOtpAsync([FromBody] ResendOtpRequest request)
     {
         var response = await _authService.ResendOtpAsync(request);
+        return Ok(response);
+    }
+
+    [HttpPost("login")]
+    [Consumes("application/json")]
+    [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+
+    public async Task<IActionResult> LoginAsync([FromBody] AdminLoginRequest request)
+    {
+        var response = await _authService.AdminLoginAsync(request);
         return Ok(response);
     }
 }
