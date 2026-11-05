@@ -10,9 +10,9 @@ using Ecommerce.Services.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Ecommerce.Services.Product;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,12 +43,11 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.Key))
         };
     });
-    
+
 ;
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 builder.Services.AddScoped<RoleSeeder>();
 builder.Services.AddScoped<SuperAdminSeeder>();
@@ -58,8 +57,7 @@ builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddTransient<ICategoryService, CategoryService>();
-
-
+builder.Services.AddTransient<IProductService, ProductService>();
 
 var app = builder.Build();
 
@@ -84,7 +82,6 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
-
 
 app.UseStaticFiles();
 app.UseMiddleware<GlobalExceptionMiddleware>();

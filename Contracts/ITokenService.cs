@@ -1,5 +1,4 @@
 using Ecommerce.Models;
-
 namespace Ecommerce.Contracts;
 
 public interface ITokenService

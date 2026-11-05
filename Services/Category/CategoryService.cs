@@ -304,8 +304,7 @@ namespace Ecommerce.Services.Category
         private static string GenerateSlug(string name)
         {
             return name.Trim().ToLowerInvariant()
-                .Replace(" ", "-")
-                .Replace("&", "and");
+                .Replace(" ", "-");
         }
 
         private static CategoryResponse MapToResponse(ModelCategory c)

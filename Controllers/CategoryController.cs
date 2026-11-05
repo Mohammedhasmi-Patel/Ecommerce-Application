@@ -57,9 +57,9 @@ namespace Ecommerce.Controllers
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(typeof(ApiResponse<List<CategoryResponse>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAllAsync([FromQuery] bool onlyActive = false)
+        public async Task<IActionResult> GetAllAsync()
         {
-            var response = await _categoryService.GetAllCategoriesAsync(onlyActive);
+            var response = await _categoryService.GetAllCategoriesAsync();
             return Ok(response);
         }
 
