@@ -7,9 +7,7 @@ namespace Ecommerce.Contracts
     {
         Task<ApiResponse<Guid>> CreateUserAsync(CreateUserRequest request);
         Task<ApiResponse<bool>> VerifyEmailAsync(VerifyUserRequest request);
-
         Task<ApiResponse<bool>> ResendOtpAsync(ResendOtpRequest request);
-
         Task<ApiResponse<LoginResponse>> AdminLoginAsync(AdminLoginRequest request);
     }
 }
