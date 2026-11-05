@@ -8,7 +8,6 @@ namespace Ecommerce.DTO.Category
         public string? Description { get; set; }
         public string? Logo { get; set; }
         public Guid? ParentCategoryId { get; set; }
-        public string? ParentCategoryName { get; set; }
         public int DisplayOrder { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }

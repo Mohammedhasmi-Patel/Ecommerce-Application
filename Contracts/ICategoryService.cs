@@ -10,8 +10,7 @@ namespace Ecommerce.Contracts
         Task<ApiResponse<bool>> DeleteCategoryAsync(Guid id);
         Task<ApiResponse<CategoryResponse>> GetCategoryByIdAsync(Guid id);
         Task<ApiResponse<CategoryResponse>> GetCategoryBySlugAsync(string slug);
-        Task<ApiResponse<List<CategoryResponse>>> GetAllCategoriesAsync(bool onlyActive = false);
-        Task<ApiResponse<List<CategoryResponse>>> GetCategoryTreeAsync();
+        Task<ApiResponse<List<CategoryResponse>>> GetAllCategoriesAsync(bool onlyActive = true);
         Task<ApiResponse<bool>> ToggleCategoryStatusAsync(Guid id);
     }
 }
