@@ -193,7 +193,8 @@ namespace Ecommerce.Services.Category
 
             var category = await _context.Categories
                 .Include(c => c.ParentCategory)
-                .Include(c => c.SubCategories.OrderBy(s => s.DisplayOrder)
+                .Include(c => c.SubCategories
+                .OrderBy(s => s.DisplayOrder)
                 .ThenBy(s => s.Name))
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Slug == normalizedSlug) ?? throw new NotFoundException($"Category with slug '{slug}' was not found.");
@@ -209,16 +210,11 @@ namespace Ecommerce.Services.Category
             };
         }
 
-        public async Task<ApiResponse<List<CategoryResponse>>> GetAllCategoriesAsync(bool onlyActive = true)
+        public async Task<ApiResponse<List<CategoryResponse>>> GetAllCategoriesAsync()
         {
             var query = _context.Categories
                 .Include(c => c.ParentCategory)
                 .AsNoTracking();
-
-            if (onlyActive)
-            {
-                query = query.Where(c => c.IsActive);
-            }
 
             var categories = await query
                 .OrderBy(c => c.DisplayOrder)
