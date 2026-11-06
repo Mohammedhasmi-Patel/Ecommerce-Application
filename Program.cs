@@ -15,6 +15,7 @@ using Microsoft.OpenApi;
 using System.Text;
 using Ecommerce.Services.Product;
 using Ecommerce.Services.Cart;
+using Ecommerce.Services.Address;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,6 +80,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 
 var app = builder.Build();
 
