@@ -90,7 +90,6 @@ namespace Ecommerce.Controllers
         }
 
         #region Helper Methods
-
         private Guid GetUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -103,7 +102,6 @@ namespace Ecommerce.Controllers
 
             return userId;
         }
-
         #endregion
     }
 }
