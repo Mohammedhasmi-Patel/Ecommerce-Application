@@ -237,7 +237,6 @@ namespace Ecommerce.Services.Product
 
             var products = await productsQuery.Include(p => p.Category)
                                         .AsNoTracking()
-                                        .OrderByDescending(p => p.CreatedAt)
                                         .ToListAsync();
 
             var response = products.Select(p =>
@@ -280,10 +279,35 @@ namespace Ecommerce.Services.Product
                 query = query.Where(p => p.Price <= request.MaxPrice.Value);
             }
 
-            if (request.Page > 0)
+            if (request.InStock.HasValue)
             {
-                query = query.Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize);
+                query = request.InStock.Value ? query.Where(p => p.StockQuantity > 0) : query.Where(p => p.StockQuantity == 0);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.SortBy) && !string.IsNullOrWhiteSpace(request.SortOrder))
+            {
+                bool isAscending = request.SortOrder.Equals("ASC", StringComparison.OrdinalIgnoreCase);
+                query = request.SortBy.ToLower() switch
+                {
+                    "name" => isAscending
+                                ? query.OrderBy(p => p.Name)
+                                : query.OrderByDescending(p => p.Name),
+
+                    "price" => isAscending
+                                ? query.OrderBy(p => p.Price)
+                                : query.OrderByDescending(p => p.Price),
+
+                    "createdat" => isAscending
+                        ? query.OrderBy(p => p.CreatedAt)
+                        : query.OrderByDescending(p => p.CreatedAt),
+
+                    _ => query
+
+                };
+            }
+            else
+            {
+                query = query.OrderByDescending(p => p.CreatedAt);
             }
 
             return query;
@@ -340,7 +364,6 @@ namespace Ecommerce.Services.Product
             }
             catch
             {
-                // Suppress file delete failure to avoid aborting database operations
             }
         }
 

@@ -7,6 +7,9 @@ namespace Ecommerce.DTO.Cart
         public List<CartItemResponse> Items { get; set; } = [];
         public int TotalItems => Items.Sum(i => i.Quantity);
         public decimal TotalAmount => Items.Sum(i => i.TotalPrice);
+        public decimal SubTotal => Items.Sum(i => i.UnitPrice * i.Quantity);
+        public decimal TotalSavings => SubTotal - TotalAmount;
+        public bool HasDiscount => TotalSavings > 0;
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

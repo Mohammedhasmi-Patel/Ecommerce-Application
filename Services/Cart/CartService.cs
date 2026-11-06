@@ -12,12 +12,10 @@ namespace Ecommerce.Services.Cart
     public class CartService : ICartService
     {
         private readonly AppDbContext _context;
-
         public CartService(AppDbContext context)
         {
             _context = context;
         }
-
         public async Task<ApiResponse<CartResponse>> AddToCartAsync(Guid userId, AddToCartRequest request)
         {
             if (request.Quantity <= 0)
