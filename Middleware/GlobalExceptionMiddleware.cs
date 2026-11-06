@@ -1,10 +1,11 @@
-﻿using Ecommerce.Common;
+﻿using System.Net;
+using System.Text.Json;
+using Ecommerce.Common;
+using Ecommerce.Common.Exceptions;
 using Ecommerce.Data;
 using Ecommerce.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Text.Json;
-using Ecommerce.Common.Exceptions;
 
 namespace Ecommerce.Middleware
 {
@@ -27,18 +28,25 @@ namespace Ecommerce.Middleware
             {
                 try
                 {
-                    var errorLog = new ErrorLog
+                    if (ex is not NotFoundException
+                        && ex is not BadRequestException
+                        && ex is not UnauthorizedException
+                        && ex is not ForbiddenException
+                        && ex is not ConflictException)
                     {
-                        Id = Guid.NewGuid(),
-                        Timestamp = DateTime.UtcNow,
-                        ExceptionType = ex.GetType().Name,
-                        Message = ex.Message,
-                        StackTrace = ex.StackTrace,
-                        RequestPath = context.Request.Path
-                    };
+                        var errorLog = new ErrorLog
+                            {
+                                Id = Guid.NewGuid(),
+                                Timestamp = DateTime.UtcNow,
+                                ExceptionType = ex.GetType().Name,
+                                Message = ex.Message,
+                                StackTrace = ex.StackTrace,
+                                RequestPath = context.Request.Path
+                            };
 
-                    await _dbContext.ErrorLogs.AddAsync(errorLog);
-                    await _dbContext.SaveChangesAsync();
+                        await _dbContext.ErrorLogs.AddAsync(errorLog);
+                        await _dbContext.SaveChangesAsync();
+                    }
                     await HandleExceptionAsync(context, ex);
                 }
                 catch (Exception logException)
@@ -69,8 +77,6 @@ namespace Ecommerce.Middleware
             await context.Response.WriteAsync(
                 JsonSerializer.Serialize(response)
             );
-
-
         }
     }
 }

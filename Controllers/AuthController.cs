@@ -2,7 +2,6 @@
 using Ecommerce.DTO.User;
 using Microsoft.AspNetCore.Mvc;
 using Ecommerce.Common;
-using Microsoft.AspNetCore.Identity.Data;
 
 namespace Ecommerce.Controllers;
 
