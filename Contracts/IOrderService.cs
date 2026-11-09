@@ -9,7 +9,9 @@ namespace Ecommerce.Contracts
         Task<ApiResponse<OrderResponse>> GetOrderByIdAsync(Guid userId, Guid orderId);
         Task<ApiResponse<List<OrderResponse>>> GetMyOrdersAsync(Guid userId);
         Task<ApiResponse<OrderResponse>> CancelOrderAsync(Guid userId, Guid orderId);
-
+        Task<ApiResponse<List<OrderResponse>>> GetAllOrdersAdminAsync(GetOrdersAdminRequest request);
+        Task<ApiResponse<OrderResponse>> GetOrderByIdAdminAsync(Guid orderId);
+        Task<ApiResponse<OrderResponse>> UpdateOrderStatusAsync(Guid orderId, UpdateOrderStatusRequest request);
     }
 }
 

@@ -253,15 +253,197 @@ namespace Ecommerce.Services.Order
             }
         }
 
+        public async Task<ApiResponse<List<OrderResponse>>> GetAllOrdersAdminAsync(GetOrdersAdminRequest request)
+        {
+            var query = _context.Orders
+                .AsNoTracking()
+                .Include(o => o.User)
+                .Include(o => o.OrderAddress)
+                .Include(o => o.OrderItems)
+                .AsQueryable();
+
+            query = ApplyOrderFilters(query, request);
+
+            query = query.OrderByDescending(o => o.CreatedAt);
+
+            if (request.Page > 0 && request.PageSize > 0)
+            {
+                query = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize);
+            }
+
+            var orders = await query.ToListAsync();
+            var response = orders.Select(MapToOrderResponse).ToList();
+
+            return new ApiResponse<List<OrderResponse>>
+            {
+                Success = true,
+                Message = "Orders retrieved successfully.",
+                Data = response,
+                StatusCode = 200
+            };
+        }
+
+        public async Task<ApiResponse<OrderResponse>> GetOrderByIdAdminAsync(Guid orderId)
+        {
+            var order = await _context.Orders
+                .AsNoTracking()
+                .Include(o => o.User)
+                .Include(o => o.OrderAddress)
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.Id == orderId)
+                ?? throw new NotFoundException("Order not found.");
+
+            var response = MapToOrderResponse(order);
+
+            return new ApiResponse<OrderResponse>
+            {
+                Success = true,
+                Message = "Order details retrieved successfully.",
+                Data = response,
+                StatusCode = 200
+            };
+        }
+
+        public async Task<ApiResponse<OrderResponse>> UpdateOrderStatusAsync(Guid orderId, UpdateOrderStatusRequest request)
+        {
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .Include(o => o.OrderAddress)
+                .FirstOrDefaultAsync(o => o.Id == orderId)
+                ?? throw new NotFoundException("Order not found.");
+
+            if (order.OrderStatus == request.OrderStatus)
+            {
+                throw new BadRequestException($"Order is already in '{request.OrderStatus}' status.");
+            }
+
+            if (order.OrderStatus == OrderStatusEnum.Cancelled)
+            {
+                throw new BadRequestException("Cannot update status of an already cancelled order.");
+            }
+
+            if (order.OrderStatus == OrderStatusEnum.Delivered && request.OrderStatus != OrderStatusEnum.Returned)
+            {
+                throw new BadRequestException("Delivered order can only be transitioned to 'Returned' status.");
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var previousStatus = order.OrderStatus;
+                order.OrderStatus = request.OrderStatus;
+                order.UpdatedAt = DateTime.UtcNow;
+
+                // If moving to Cancelled or Returned, restore inventory and refund if paid
+                if (request.OrderStatus == OrderStatusEnum.Cancelled || request.OrderStatus == OrderStatusEnum.Returned)
+                {
+                    if (order.PaymentStatus == PaymentStatusEnum.Paid)
+                    {
+                        order.PaymentStatus = PaymentStatusEnum.Refunded;
+                    }
+
+                    var productIds = order.OrderItems.Select(oi => oi.ProductId).Distinct().ToList();
+                    var products = await _context.Products
+                        .Where(p => productIds.Contains(p.Id))
+                        .ToListAsync();
+
+                    foreach (var item in order.OrderItems)
+                    {
+                        var product = products.FirstOrDefault(p => p.Id == item.ProductId);
+                        if (product != null)
+                        {
+                            product.StockQuantity += item.Quantity;
+                            product.UpdatedAt = DateTime.UtcNow;
+                        }
+                    }
+                }
+                else if (request.OrderStatus == OrderStatusEnum.Delivered && order.PaymentStatus == PaymentStatusEnum.Pending)
+                {
+                    order.PaymentStatus = PaymentStatusEnum.Paid;
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                var response = MapToOrderResponse(order);
+
+                return new ApiResponse<OrderResponse>
+                {
+                    Success = true,
+                    Message = $"Order status updated from '{previousStatus}' to '{order.OrderStatus}' successfully.",
+                    Data = response,
+                    StatusCode = 200
+                };
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
         #region Helper Methods
+
+        private static IQueryable<ModelOrder> ApplyOrderFilters(IQueryable<ModelOrder> query, GetOrdersAdminRequest request)
+        {
+            if (!string.IsNullOrWhiteSpace(request.Search))
+            {
+                var search = request.Search.Trim().ToLower();
+                query = query.Where(o =>
+                    o.OrderNumber.ToLower().Contains(search) ||
+                    (o.User != null && (
+                        o.User.FirstName.ToLower().Contains(search) ||
+                        (o.User.LastName != null && o.User.LastName.ToLower().Contains(search)) ||
+                        (o.User.Email != null && o.User.Email.ToLower().Contains(search))
+                    )) ||
+                    (o.OrderAddress != null && o.OrderAddress.FullName.ToLower().Contains(search))
+                );
+            }
+
+            if (request.OrderStatus.HasValue)
+            {
+                query = query.Where(o => o.OrderStatus == request.OrderStatus.Value);
+            }
+
+            if (request.PaymentStatus.HasValue)
+            {
+                query = query.Where(o => o.PaymentStatus == request.PaymentStatus.Value);
+            }
+
+            if (request.FromDate.HasValue)
+            {
+                var fromUtc = DateTime.SpecifyKind(request.FromDate.Value, DateTimeKind.Utc);
+                query = query.Where(o => o.CreatedAt >= fromUtc);
+            }
+
+            if (request.ToDate.HasValue)
+            {
+                var toUtc = DateTime.SpecifyKind(request.ToDate.Value, DateTimeKind.Utc);
+                query = query.Where(o => o.CreatedAt <= toUtc);
+            }
+
+            return query;
+        }
 
         private static OrderResponse MapToOrderResponse(ModelOrder order)
         {
             var response = order.Adapt<OrderResponse>();
 
+            if (order.User != null)
+            {
+                response.CustomerName = $"{order.User.FirstName} {order.User.LastName}".Trim();
+                response.CustomerEmail = order.User.Email;
+            }
+
             if (order.OrderAddress != null)
             {
                 response.ShippingAddress = order.OrderAddress.Adapt<OrderAddressResponse>();
+                if (string.IsNullOrEmpty(response.CustomerName))
+                {
+                    response.CustomerName = order.OrderAddress.FullName;
+                }
             }
 
             response.Items = order.OrderItems.Select(oi => oi.Adapt<OrderItemResponse>()).ToList();

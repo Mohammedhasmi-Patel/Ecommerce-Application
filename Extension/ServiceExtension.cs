@@ -8,10 +8,12 @@ using Ecommerce.Services.Auth;
 using Ecommerce.Services.Cart;
 using Ecommerce.Services.Category;
 using Ecommerce.Services.Email;
+using Ecommerce.Services.Location;
 using Ecommerce.Services.Order;
 using Ecommerce.Services.Payment;
 using Ecommerce.Services.Payment.Gateways;
 using Ecommerce.Services.Product;
+using Ecommerce.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -94,8 +96,10 @@ namespace Ecommerce.Extension
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IUserService, UserService>();
 
             services.AddScoped<IPaymentGateway, RazorpayPaymentGateway>();
             services.AddScoped<IPaymentGateway, StripePaymentGateway>();

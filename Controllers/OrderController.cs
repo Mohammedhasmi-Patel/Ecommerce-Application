@@ -2,6 +2,7 @@ using Ecommerce.Common;
 using Ecommerce.Common.Exceptions;
 using Ecommerce.Contracts;
 using Ecommerce.DTO.Order;
+using Ecommerce.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -63,6 +64,43 @@ namespace Ecommerce.Controllers
         {
             var userId = GetUserId();
             var response = await _orderService.CancelOrderAsync(userId, id);
+            return Ok(response);
+        }
+
+        [HttpGet("admin/all")]
+        [Authorize(Roles = nameof(UserRoleEnum.Admin))]
+        [ProducesResponseType(typeof(ApiResponse<List<OrderResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetAllOrdersAdminAsync([FromQuery] GetOrdersAdminRequest request)
+        {
+            var response = await _orderService.GetAllOrdersAdminAsync(request);
+            return Ok(response);
+        }
+
+        [HttpGet("admin/{id:guid}")]
+        [Authorize(Roles = nameof(UserRoleEnum.Admin))]
+        [ProducesResponseType(typeof(ApiResponse<OrderResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetOrderByIdAdminAsync(Guid id)
+        {
+            var response = await _orderService.GetOrderByIdAdminAsync(id);
+            return Ok(response);
+        }
+
+        [HttpPatch("admin/{id:guid}/status")]
+        [Authorize(Roles = nameof(UserRoleEnum.Admin))]
+        [Consumes("application/json")]
+        [ProducesResponseType(typeof(ApiResponse<OrderResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateOrderStatusAsync(Guid id, [FromBody] UpdateOrderStatusRequest request)
+        {
+            var response = await _orderService.UpdateOrderStatusAsync(id, request);
             return Ok(response);
         }
 
